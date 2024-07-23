@@ -3,15 +3,25 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const passport = require('passport');
+const session = require('express-session');
 
 dotenv.config();
 
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true
+}));
 app.use(express.json());
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true
+}));
 app.use(passport.initialize());
+app.use(passport.session());
 
 // Passport config
 require('./config/passport')(passport);
@@ -26,7 +36,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 
 app.get('/', (req, res) => {
     res.send('Task Management API is running');
-  });
+});
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
